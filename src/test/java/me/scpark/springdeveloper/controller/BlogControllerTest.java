@@ -35,7 +35,7 @@ public class BlogControllerTest {
     protected BlogRepository blogRepository;
 
     @BeforeEach
-    public void cleanUp() {
+    public void deleteAll() {
         blogRepository.deleteAll();
     }
 
@@ -76,6 +76,25 @@ public class BlogControllerTest {
         resultActions.andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].content").value("content"))
                 .andExpect(jsonPath("$[0].title").value("title"));
+    }
+
+    @DisplayName("findArticle: 블로그 글 조회에 성공.")
+    @Test
+    public void findArticle() throws Exception{
+        //given(데이터 분비)
+        final String url = "/api/articles/{id}";
+        final String title = "블로그 제목";
+        final String content = "블로그 내용";
+
+        Article savedArticle = blogRepository.save(Article.builder().title(title).content(content).build());
+
+        //when(실행: 위헤서 생성된 블로그글을 조회)
+        final ResultActions resultActions = mockMvc.perform(get(url,savedArticle.getId()));
+
+        //then
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("&.title").value(title))
+                .andExpect(jsonPath("$.content").value(content));
     }
 }
 
